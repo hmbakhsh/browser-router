@@ -3,160 +3,204 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fffdf7" />
     <meta
       name="description"
-      content="Browser Router opens every external link in the right Chromium profile. Native, local, and configured with JSON."
+      content="Browser Router sends every external link to the Chromium profile where it belongs. A tiny, local macOS utility."
     />
-    <meta name="theme-color" content="#f4f1e8" />
-    <meta property="og:title" content="Browser Router for macOS" />
+    <meta property="og:title" content="Browser Router for Mac" />
     <meta
       property="og:description"
-      content="Open external links in the right Chromium profile. No extension, no Electron, no telemetry."
+      content="Work links in Work. Personal links in Personal. No extension, no Electron, no telemetry."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://rootie.hbak.co" />
-    <title>Browser Router — links, correctly profiled</title>
+    <title>Browser Router — links know where to go</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
     <script src="/script.js" defer></script>
   </head>
   <body>
-    <header class="site-header wrap">
-      <a class="brand" href="#top" aria-label="Browser Router home">
-        <svg aria-hidden="true" viewBox="0 0 32 32">
-          <path d="M16 27V7m0 8 8-8m-8 13-8-8" />
-          <circle cx="16" cy="27" r="2.5" />
-          <circle cx="24" cy="7" r="2.5" />
-          <circle cx="8" cy="12" r="2.5" />
-        </svg>
-        <span>Browser Router</span>
+    <header class="nav shell">
+      <a class="wordmark" href="#top" aria-label="Browser Router home">
+        <span class="mini-mark" aria-hidden="true">↗</span>
+        Browser Router
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#configure">Configure</a>
-        <a href="https://github.com/hmbakhsh/browser-router">GitHub ↗</a>
+        <a href="#how">How it works</a>
+        <a href="https://github.com/hmbakhsh/browser-router">GitHub</a>
+        <a class="nav-button" href="#install">Get it</a>
       </nav>
     </header>
 
     <main id="top">
-      <section class="hero wrap">
-        <div class="eyebrow">A tiny native utility for macOS</div>
-        <h1>Every link.<br /><em>The right profile.</em></h1>
-        <p class="lede">
-          Route links from Slack, Mail, Terminal, and everywhere else to the Chromium profile
-          where they belong.
-        </p>
-        <div class="hero-actions">
-          <a class="button" href="#install">Install with Homebrew</a>
-          <span>macOS 13+ · Apple Silicon & Intel</span>
+      <section class="hero shell">
+        <div class="floating-link link-slack" aria-hidden="true">
+          <span>◈</span><small>from Slack</small><strong>meet.google.com</strong>
+        </div>
+        <div class="floating-link link-mail" aria-hidden="true">
+          <span>✉</span><small>from Mail</small><strong>github.com/acme</strong>
+        </div>
+        <div class="profile-floater profile-work" aria-hidden="true">
+          <span>W</span><strong>Work</strong><small>Profile 3</small>
+        </div>
+        <div class="profile-floater profile-home" aria-hidden="true">
+          <span>P</span><strong>Personal</strong><small>Default</small>
         </div>
 
-        <div class="route-demo" aria-label="Example link routing">
-          <div class="source">
-            <span class="source-app">Slack</span>
+        <div class="hero-copy">
+          <div class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80">
+              <path d="M40 61V23m0 17 17-17M40 48 23 35" />
+              <circle cx="40" cy="61" r="4" />
+              <circle cx="57" cy="23" r="4" />
+              <circle cx="23" cy="35" r="4" />
+            </svg>
+          </div>
+          <p class="hello">A tiny URL router for your Mac</p>
+          <h1>Links should know<br />where to go.</h1>
+          <p class="intro">
+            Work links in Work. Personal links in Personal.<br />Browser Router quietly sends them
+            to the right Chromium profile.
+          </p>
+          <a class="primary-button" href="#install">Get Browser Router <span>↓</span></a>
+          <small class="compatibility">macOS 13+ · Apple Silicon & Intel · Free & open source</small>
+        </div>
+      </section>
+
+      <section class="routing-playground shell" id="how">
+        <div class="section-intro">
+          <p class="scribble">here’s the whole trick</p>
+          <h2>One click.<br />Right place.</h2>
+          <p>
+            Links from outside your browser pass through one small set of rules. A match picks a
+            profile. No match just uses your default.
+          </p>
+        </div>
+
+        <div class="route-card">
+          <div class="incoming-link">
+            <small>you clicked</small>
             <strong>github.com/acme/launch</strong>
           </div>
-          <svg class="route-line" aria-hidden="true" viewBox="0 0 360 90" preserveAspectRatio="none">
-            <path d="M2 45 C110 45 105 14 190 14 H358" />
-            <path d="M190 14 C245 14 260 76 358 76" />
-          </svg>
-          <div class="destinations">
-            <div><span class="dot work"></span><strong>Work</strong><small>matched rule</small></div>
-            <div><span class="dot personal"></span><strong>Personal</strong><small>default</small></div>
+          <div class="route-track" aria-hidden="true">
+            <span class="traveller">↗</span>
           </div>
-        </div>
-      </section>
-
-      <section class="principles wrap" aria-label="Product principles">
-        <p><strong>Native.</strong> No Electron shell.</p>
-        <p><strong>Local.</strong> URLs never leave your Mac.</p>
-        <p><strong>Plain.</strong> One JSON file you own.</p>
-      </section>
-
-      <section class="install-section wrap" id="install">
-        <div class="section-heading">
-          <span>01 / Install</span>
-          <h2>One command,<br />then one permission.</h2>
-        </div>
-        <div class="section-content">
-          <div class="terminal">
-            <div class="terminal-bar"><i></i><i></i><i></i><span>Terminal</span></div>
-            <div class="command-row">
-              <code>brew install --cask hmbakhsh/tap/browser-router</code>
-              <button class="copy" data-copy="brew install --cask hmbakhsh/tap/browser-router">
-                Copy
-              </button>
+          <div class="profile-stack">
+            <div class="browser-profile active">
+              <span class="avatar blue">W</span>
+              <div><strong>Work</strong><small>because /acme matched</small></div>
+              <span class="check">✓</span>
+            </div>
+            <div class="browser-profile">
+              <span class="avatar peach">P</span>
+              <div><strong>Personal</strong><small>your default</small></div>
             </div>
           </div>
-          <p>
-            Browser Router lives quietly in your menu bar. macOS asks once before making it the
-            default handler for web links.
-          </p>
         </div>
       </section>
 
-      <section class="configure-section wrap" id="configure">
-        <div class="section-heading">
-          <span>02 / Configure</span>
-          <h2>Guided by CLI.<br />Defined by JSON.</h2>
+      <section class="tiny shell">
+        <p class="scribble centered">tiny on purpose</p>
+        <h2>It does one thing.<br />Then gets out of the way.</h2>
+        <div class="tiny-things">
+          <article>
+            <span aria-hidden="true">⌁</span>
+            <h3>Lives in the menu bar</h3>
+            <p>No windows hanging around. Negligible idle CPU.</p>
+          </article>
+          <article>
+            <span aria-hidden="true">{ }</span>
+            <h3>Your config is just a file</h3>
+            <p>Readable JSON at <code>~/.browser-router/config.json</code>.</p>
+          </article>
+          <article>
+            <span aria-hidden="true">♡</span>
+            <h3>Nothing leaves your Mac</h3>
+            <p>No account, analytics, cloud sync, or mystery service.</p>
+          </article>
         </div>
-        <div class="section-content">
-          <div class="cli-steps">
-            <code><b>$</b> browser-router setup</code>
-            <code><b>$</b> browser-router config</code>
-            <code><b>$</b> browser-router validate</code>
-            <code><b>$</b> browser-router default</code>
+      </section>
+
+      <section class="setup shell" id="install">
+        <div class="setup-copy">
+          <p class="scribble">ready when you are</p>
+          <h2>Set up in a<br />minute or two.</h2>
+          <p>
+            The little CLI finds your installed browsers and profile names. Pick a default, add a
+            few rules, and you’re done.
+          </p>
+          <div class="browser-list" aria-label="Supported browsers">
+            <span>Chrome</span><span>Helium</span><span>Brave</span><span>Edge</span>
+            <span>Chromium</span><span>Vivaldi</span><span>your weird custom fork</span>
           </div>
-          <p>
-            Setup discovers installed Chromium browsers and their real profile names. Your rules
-            remain readable at <code>~/.browser-router/config.json</code>.
+        </div>
+
+        <div class="terminal-wrap">
+          <div class="terminal">
+            <div class="terminal-top"><i></i><i></i><i></i><span>Terminal</span></div>
+            <div class="terminal-body">
+              <p><b>$</b> brew install --cask hmbakhsh/tap/browser-router</p>
+              <p class="success">✓ Browser Router was successfully installed!</p>
+              <p><b>$</b> browser-router setup</p>
+              <p class="muted">Chromium browser:</p>
+              <p>&nbsp;&nbsp;1) Helium <span class="muted">(default)</span></p>
+              <p>&nbsp;&nbsp;2) Google Chrome</p>
+              <p><b>›</b> 1</p>
+            </div>
+            <button
+              class="copy-button"
+              data-copy="brew install --cask hmbakhsh/tap/browser-router"
+            >
+              Copy install command
+            </button>
+          </div>
+          <p class="notarize-note">
+            Not notarized just yet—macOS may ask you to approve the first launch in Privacy &
+            Security.
           </p>
         </div>
       </section>
 
-      <section class="config-section wrap">
-        <div class="config-copy">
-          <span class="kicker">Precise when you need it</span>
-          <h2>Match a host.<br />Narrow by path.</h2>
-          <p>
-            Rules run top to bottom. The first match wins; everything else opens in your default
-            profile.
-          </p>
-        </div>
-        <pre aria-label="Example Browser Router configuration"><code>{
-  <span class="key">"defaultProfile"</span>: <span class="value">"Personal"</span>,
+      <section class="config shell">
+        <div class="config-window">
+          <div class="config-top"><span>config.json</span><small>the whole source of truth</small></div>
+          <pre><code>{
+  <span class="key">"defaultProfile"</span>: <span class="string">"Personal"</span>,
   <span class="key">"rules"</span>: [{
-    <span class="key">"name"</span>: <span class="value">"Acme GitHub"</span>,
-    <span class="key">"profile"</span>: <span class="value">"Work"</span>,
+    <span class="key">"name"</span>: <span class="string">"Acme stuff"</span>,
+    <span class="key">"profile"</span>: <span class="string">"Work"</span>,
     <span class="key">"enabled"</span>: <span class="bool">true</span>,
     <span class="key">"match"</span>: {
-      <span class="key">"host"</span>: <span class="value">"github.com"</span>,
-      <span class="key">"pathPrefix"</span>: <span class="value">"/acme"</span>,
-      <span class="key">"includeSubdomains"</span>: <span class="bool">false</span>
+      <span class="key">"host"</span>: <span class="string">"github.com"</span>,
+      <span class="key">"pathPrefix"</span>: <span class="string">"/acme"</span>
     }
   }]
 }</code></pre>
-      </section>
-
-      <section class="browser-strip wrap" aria-label="Supported browsers">
-        <span>Works with</span>
-        <div>
-          <strong>Chrome</strong><strong>Helium</strong><strong>Brave</strong>
-          <strong>Edge</strong><strong>Chromium</strong><strong>Vivaldi</strong>
         </div>
-        <small>and custom Chromium forks</small>
+        <div class="config-note">
+          <p class="scribble">no new language to learn</p>
+          <h2>Rules you can<br />actually read.</h2>
+          <p>Exact domains, subdomains, or path prefixes. First match wins. That’s really it.</p>
+          <a href="https://github.com/hmbakhsh/browser-router#json-configuration">See the config guide →</a>
+        </div>
       </section>
 
-      <section class="final-cta wrap">
-        <h2>Stop checking<br />which profile you’re in.</h2>
-        <a class="button inverse" href="https://github.com/hmbakhsh/browser-router/releases/latest">
-          Get Browser Router ↗
-        </a>
+      <section class="closing">
+        <div class="shell">
+          <div class="closing-mark" aria-hidden="true">↗</div>
+          <h2>Your links have<br />places to be.</h2>
+          <p>Browser Router is free, open source, and very small.</p>
+          <a class="primary-button light" href="https://github.com/hmbakhsh/browser-router/releases/latest">
+            Get Browser Router <span>↗</span>
+          </a>
+        </div>
       </section>
     </main>
 
-    <footer class="wrap">
-      <span>Browser Router is open source under MIT.</span>
-      <a href="https://github.com/hmbakhsh/browser-router">View source ↗</a>
+    <footer class="shell">
+      <span>Made by <a href="https://github.com/hmbakhsh">Haroon</a> because profile mix-ups are annoying.</span>
+      <span><a href="https://github.com/hmbakhsh/browser-router">Source</a> · MIT License</span>
     </footer>
   </body>
 </html>
