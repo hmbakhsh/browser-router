@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import BrowserRouter
+@testable import Rootie
 
 struct ChromiumProfilesTests {
   @Test("Resolves display names to Chromium profile directories")

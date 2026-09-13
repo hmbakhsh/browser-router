@@ -1,19 +1,19 @@
 import Foundation
 import Testing
 
-@testable import BrowserRouter
+@testable import Rootie
 
 @MainActor
-struct BrowserRouterCLITests {
+struct RootieCLITests {
   @Test("App launches normally without CLI arguments")
   func detectsCLIInvocation() {
-    #expect(!BrowserRouterCLI.shouldRun(arguments: [], executablePath: "/app/BrowserRouter"))
+    #expect(!RootieCLI.shouldRun(arguments: [], executablePath: "/app/Rootie"))
     #expect(
-      BrowserRouterCLI.shouldRun(arguments: [], executablePath: "/opt/homebrew/bin/browser-router"))
+      RootieCLI.shouldRun(arguments: [], executablePath: "/opt/homebrew/bin/rootie"))
     #expect(
-      BrowserRouterCLI.shouldRun(arguments: ["validate"], executablePath: "/app/BrowserRouter"))
+      RootieCLI.shouldRun(arguments: ["validate"], executablePath: "/app/Rootie"))
     #expect(
-      !BrowserRouterCLI.shouldRun(arguments: ["-psn_0_123"], executablePath: "/app/BrowserRouter"))
+      !RootieCLI.shouldRun(arguments: ["-psn_0_123"], executablePath: "/app/Rootie"))
   }
 
   @Test("Non-interactive setup saves the selected browser and profile")
@@ -99,8 +99,8 @@ private final class Fixture {
 
   func cli(
     arguments: [String], browsers: [ChromiumBrowser], profiles: [ChromiumProfile]
-  ) -> BrowserRouterCLI {
-    BrowserRouterCLI(
+  ) -> RootieCLI {
+    RootieCLI(
       arguments: arguments,
       configStore: store,
       installedBrowsers: { browsers },

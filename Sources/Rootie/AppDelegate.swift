@@ -51,7 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   private func buildMenu() {
     statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     statusItem.button?.image = NSImage(
-      systemSymbolName: "arrow.triangle.branch", accessibilityDescription: "Browser Router")
+      systemSymbolName: "arrow.triangle.branch", accessibilityDescription: "Rootie")
 
     let menu = NSMenu()
     statusMenuItem = NSMenuItem(title: lastResult, action: nil, keyEquivalent: "")
@@ -68,7 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       withTitle: "Troubleshooting", action: #selector(showTroubleshooting), keyEquivalent: "")
     menu.addItem(.separator())
     let quitItem = menu.addItem(
-      withTitle: "Quit Browser Router", action: #selector(NSApplication.terminate(_:)),
+      withTitle: "Quit Rootie", action: #selector(NSApplication.terminate(_:)),
       keyEquivalent: "q")
     quitItem.target = NSApp
 
@@ -129,7 +129,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
           self?.updateStatus("Default browser")
           self?.showMessage(
-            title: "Browser Router is ready",
+            title: "Rootie is ready",
             text: "HTTP and HTTPS links will now be routed to your configured browser.")
         }
       }
@@ -142,7 +142,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ChromiumProfiles(browser: $0.selectedBrowser).localStateURL.path
       } ?? "Not configured"
     showMessage(
-      title: "Browser Router",
+      title: "Rootie",
       text:
         "Status: \(lastResult)\n\nConfiguration:\n\(configStore.configURL.path)\n\nBrowser profiles:\n\(profileState)"
     )

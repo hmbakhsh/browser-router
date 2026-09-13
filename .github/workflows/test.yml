@@ -13,4 +13,4 @@ jobs:
       - run: swift test
       - run: xcrun swift-format lint -r Sources Tests scripts/generate-icon.swift
       - run: ./scripts/build-app.sh
-      - run: codesign --verify --deep --strict "dist/Browser Router.app"
+      - run: codesign --verify --deep --strict "dist/Rootie.app"

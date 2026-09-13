@@ -2,13 +2,13 @@ import AppKit
 
 @main
 @MainActor
-enum BrowserRouterApp {
+enum RootieApp {
   static func main() {
     let arguments = Array(CommandLine.arguments.dropFirst())
-    if BrowserRouterCLI.shouldRun(
+    if RootieCLI.shouldRun(
       arguments: arguments, executablePath: CommandLine.arguments[0])
     {
-      exit(BrowserRouterCLI(arguments: arguments).run())
+      exit(RootieCLI(arguments: arguments).run())
     }
 
     let app = NSApplication.shared

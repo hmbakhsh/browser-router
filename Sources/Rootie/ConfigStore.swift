@@ -17,12 +17,19 @@ final class ConfigStore {
   init(homeDirectory: URL, applicationSupportDirectory: URL) {
     configURL =
       homeDirectory
-      .appendingPathComponent(".browser-router", isDirectory: true)
+      .appendingPathComponent(".rootie", isDirectory: true)
       .appendingPathComponent("config.json")
-    legacyConfigURLs = ["browser-router", "dev.36labs.browser-router"].map {
-      applicationSupportDirectory.appendingPathComponent($0, isDirectory: true)
-        .appendingPathComponent("config.json")
-    }
+    legacyConfigURLs = [
+      homeDirectory
+        .appendingPathComponent(".browser-router", isDirectory: true)
+        .appendingPathComponent("config.json"),
+      applicationSupportDirectory
+        .appendingPathComponent("browser-router", isDirectory: true)
+        .appendingPathComponent("config.json"),
+      applicationSupportDirectory
+        .appendingPathComponent("dev.36labs.browser-router", isDirectory: true)
+        .appendingPathComponent("config.json"),
+    ]
   }
 
   init(configURL: URL) {

@@ -13,8 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: ./scripts/build-app.sh
-      - run: ditto -c -k --keepParent "dist/Browser Router.app" Browser-Router.zip
+      - run: ditto -c -k --keepParent "dist/Rootie.app" Rootie.zip
       - uses: softprops/action-gh-release@v2
         with:
-          files: Browser-Router.zip
+          files: Rootie.zip
           generate_release_notes: true

@@ -1,6 +1,6 @@
 import Testing
 
-@testable import BrowserRouter
+@testable import Rootie
 
 struct StarterConfigurationTests {
   @Test("Prefers a personal profile for a safe default")

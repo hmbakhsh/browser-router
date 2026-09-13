@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import BrowserRouter
+@testable import Rootie
 
 struct ConfigStoreTests {
   @Test("Reports when no configuration exists")
@@ -74,6 +74,29 @@ struct ConfigStoreTests {
     #expect(FileManager.default.fileExists(atPath: store.configURL.path))
     #expect(!FileManager.default.fileExists(atPath: legacyURL.path))
     #expect(store.config?.defaultProfile == "Personal")
+  }
+
+  @Test("Migrates Browser Router configuration to the Rootie path")
+  func migratesBrowserRouterConfig() throws {
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let home = root.appendingPathComponent("home")
+    let appSupport = root.appendingPathComponent("Application Support")
+    let legacyURL =
+      home
+      .appendingPathComponent(".browser-router")
+      .appendingPathComponent("config.json")
+    try FileManager.default.createDirectory(
+      at: legacyURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+    try JSONEncoder().encode(TestFixtures.workConfig).write(to: legacyURL)
+
+    let store = ConfigStore(homeDirectory: home, applicationSupportDirectory: appSupport)
+
+    #expect(store.load())
+    #expect(store.configURL.path.hasSuffix("/.rootie/config.json"))
+    #expect(FileManager.default.fileExists(atPath: store.configURL.path))
+    #expect(!FileManager.default.fileExists(atPath: legacyURL.path))
+    #expect(store.config == TestFixtures.workConfig)
   }
 
   @Test("Rejects ambiguous path prefixes")
