@@ -1,0 +1,20 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/build-app.sh
+      - run: ditto -c -k --keepParent "dist/Browser Router.app" Browser-Router.zip
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: Browser-Router.zip
+          generate_release_notes: true

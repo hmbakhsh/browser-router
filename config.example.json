@@ -1,0 +1,29 @@
+{
+  "browser": {
+    "applicationPath": "/Applications/Google Chrome.app",
+    "name": "Google Chrome",
+    "userDataPath": "~/Library/Application Support/Google/Chrome"
+  },
+  "defaultProfile": "Personal",
+  "rules": [
+    {
+      "enabled": true,
+      "match": {
+        "host": "example.com",
+        "includeSubdomains": true
+      },
+      "name": "Example work domain",
+      "profile": "Work"
+    },
+    {
+      "enabled": true,
+      "match": {
+        "host": "github.com",
+        "includeSubdomains": false,
+        "pathPrefix": "/your-organization"
+      },
+      "name": "Example GitHub organization",
+      "profile": "Work"
+    }
+  ]
+}

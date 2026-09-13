@@ -1,0 +1,16 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+      - run: xcrun swift-format lint -r Sources Tests scripts/generate-icon.swift
+      - run: ./scripts/build-app.sh
+      - run: codesign --verify --deep --strict "dist/Browser Router.app"
