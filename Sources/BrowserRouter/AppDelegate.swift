@@ -112,25 +112,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   private func createStarterConfiguration() {
     do {
-      guard let browser = BrowserCatalog.installed().first else {
-        throw ConfigError.invalid(
-          "No supported Chromium browser was found. Install and open one, then choose Open Configuration again."
-        )
-      }
-      let profiles = try ChromiumProfiles(browser: browser).all()
-      guard
-        let profile =
-          profiles.first(where: {
-            $0.displayName.localizedCaseInsensitiveContains("personal")
-          }) ?? profiles.first
-      else {
-        throw ConfigError.invalid(
-          "No profiles were found for \(browser.name). Open the browser once, then choose Open Configuration again."
-        )
-      }
-
-      try configStore.save(
-        RouterConfig(browser: browser, defaultProfile: profile.displayName, rules: []))
+      try configStore.save(StarterConfiguration.make())
       updateStatus("Edit configuration")
       openConfiguration()
     } catch {

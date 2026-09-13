@@ -4,12 +4,15 @@ A tiny native macOS app that opens links in the right Chromium browser profile.
 No Electron, no background service, and no browser extension for links opened
 from Mail, Slack, Terminal, IDEs, and other apps.
 
+**Website:** [rootie.hbak.co](https://rootie.hbak.co)
+
 ## Features
 
 - Routes by exact domain, subdomain, and path prefix
 - Opens the matching Chromium profile directly
 - Automatic starter configuration based on installed browsers and profiles
 - Plain JSON configuration at `~/.browser-router/config.json`
+- CLI for setup, discovery, and validation
 - Native menu-bar app with negligible idle CPU use
 - Universal app for Apple Silicon and Intel Macs
 
@@ -29,7 +32,15 @@ the JSON configuration.
 
 ## Install
 
-### One command
+### Homebrew
+
+```sh
+brew install --cask hmbakhsh/tap/browser-router
+```
+
+This installs both **Browser Router.app** and the `browser-router` command.
+
+### Install script
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/hmbakhsh/browser-router/main/scripts/install-release.sh | zsh
@@ -45,6 +56,18 @@ On first launch, Browser Router creates `~/.browser-router/config.json` using an
 installed browser and profile, then opens it in your text editor. Add your rules,
 save the file, choose **Reload Configuration**, then choose **Make Default
 Browser** from the menu-bar icon.
+
+You can instead configure it from Terminal:
+
+```sh
+browser-router setup
+browser-router config
+browser-router validate
+browser-router default
+```
+
+Run `browser-router help` for browser and profile discovery commands or use
+`--browser` and `--profile` with `setup` for non-interactive configuration.
 
 ## JSON configuration
 
