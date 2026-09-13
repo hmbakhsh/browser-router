@@ -52,7 +52,7 @@ struct RootieCLI {
     do {
       switch command {
       case "help", "--help", "-h": output(Self.help)
-      case "version", "--version", "-v": output(Self.version)
+      case "version", "--version", "-v": output(Self.version())
       case "browsers": try listBrowsers()
       case "profiles": try listProfiles()
       case "setup", "init": try setup()
@@ -280,9 +280,19 @@ struct RootieCLI {
     return app.pathExtension == "app" ? app : nil
   }
 
-  static var version: String {
-    Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-      ?? "development"
+  static func version(executablePath: String = CommandLine.arguments[0]) -> String {
+    if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString")
+      as? String
+    {
+      return version
+    }
+    guard let appURL = applicationURL(executablePath: executablePath),
+      let bundle = Bundle(url: appURL),
+      let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    else {
+      return "development"
+    }
+    return version
   }
 
   static let help = """

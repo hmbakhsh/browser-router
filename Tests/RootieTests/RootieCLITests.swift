@@ -16,6 +16,29 @@ struct RootieCLITests {
       !RootieCLI.shouldRun(arguments: ["-psn_0_123"], executablePath: "/app/Rootie"))
   }
 
+  @Test("Reads the version from the app bundle when invoked through a CLI symlink")
+  func readsBundledVersion() throws {
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let app = directory.appendingPathComponent("Rootie.app")
+    let contents = app.appendingPathComponent("Contents")
+    let executable = contents.appendingPathComponent("MacOS/Rootie")
+    try FileManager.default.createDirectory(
+      at: executable.deletingLastPathComponent(), withIntermediateDirectories: true)
+    let plist: [String: Any] = [
+      "CFBundleExecutable": "Rootie",
+      "CFBundleIdentifier": "io.github.hmbakhsh.rootie.test",
+      "CFBundlePackageType": "APPL",
+      "CFBundleShortVersionString": "1.2.3",
+    ]
+    let data = try PropertyListSerialization.data(
+      fromPropertyList: plist, format: .xml, options: 0)
+    try data.write(to: contents.appendingPathComponent("Info.plist"))
+    FileManager.default.createFile(atPath: executable.path, contents: Data())
+
+    #expect(RootieCLI.version(executablePath: executable.path) == "1.2.3")
+  }
+
   @Test("Non-interactive setup saves the selected browser and profile")
   func setupWithOptions() throws {
     let fixture = try Fixture()
