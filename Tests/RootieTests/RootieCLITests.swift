@@ -23,8 +23,11 @@ struct RootieCLITests {
     let app = directory.appendingPathComponent("Rootie.app")
     let contents = app.appendingPathComponent("Contents")
     let executable = contents.appendingPathComponent("MacOS/Rootie")
+    let bin = directory.appendingPathComponent("bin")
+    let symlink = bin.appendingPathComponent("rootie")
     try FileManager.default.createDirectory(
       at: executable.deletingLastPathComponent(), withIntermediateDirectories: true)
+    try FileManager.default.createDirectory(at: bin, withIntermediateDirectories: true)
     let plist: [String: Any] = [
       "CFBundleExecutable": "Rootie",
       "CFBundleIdentifier": "io.github.hmbakhsh.rootie.test",
@@ -34,9 +37,12 @@ struct RootieCLITests {
     let data = try PropertyListSerialization.data(
       fromPropertyList: plist, format: .xml, options: 0)
     try data.write(to: contents.appendingPathComponent("Info.plist"))
-    FileManager.default.createFile(atPath: executable.path, contents: Data())
+    FileManager.default.createFile(
+      atPath: executable.path, contents: Data(),
+      attributes: [.posixPermissions: 0o755])
+    try FileManager.default.createSymbolicLink(at: symlink, withDestinationURL: executable)
 
-    #expect(RootieCLI.version(executablePath: executable.path) == "1.2.3")
+    #expect(RootieCLI.version(executablePath: "rootie", searchPath: bin.path) == "1.2.3")
   }
 
   @Test("Non-interactive setup saves the selected browser and profile")

@@ -273,20 +273,42 @@ struct RootieCLI {
     try process.run()
   }
 
-  static func applicationURL(executablePath: String = CommandLine.arguments[0]) -> URL? {
-    let executable = URL(fileURLWithPath: executablePath).resolvingSymlinksInPath()
+  static func applicationURL(
+    executablePath: String = CommandLine.arguments[0],
+    searchPath: String? = ProcessInfo.processInfo.environment["PATH"]
+  ) -> URL? {
+    let executable = executableURL(executablePath: executablePath, searchPath: searchPath)
     let app = executable.deletingLastPathComponent().deletingLastPathComponent()
       .deletingLastPathComponent()
     return app.pathExtension == "app" ? app : nil
   }
 
-  static func version(executablePath: String = CommandLine.arguments[0]) -> String {
+  private static func executableURL(executablePath: String, searchPath: String?) -> URL {
+    if executablePath.contains("/") {
+      return URL(fileURLWithPath: executablePath).resolvingSymlinksInPath()
+    }
+    if let searchPath {
+      for directory in searchPath.split(separator: ":") {
+        let candidate = URL(fileURLWithPath: String(directory), isDirectory: true)
+          .appendingPathComponent(executablePath)
+        if FileManager.default.isExecutableFile(atPath: candidate.path) {
+          return candidate.resolvingSymlinksInPath()
+        }
+      }
+    }
+    return URL(fileURLWithPath: executablePath).resolvingSymlinksInPath()
+  }
+
+  static func version(
+    executablePath: String = CommandLine.arguments[0],
+    searchPath: String? = ProcessInfo.processInfo.environment["PATH"]
+  ) -> String {
     if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString")
       as? String
     {
       return version
     }
-    guard let appURL = applicationURL(executablePath: executablePath),
+    guard let appURL = applicationURL(executablePath: executablePath, searchPath: searchPath),
       let bundle = Bundle(url: appURL),
       let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
     else {
