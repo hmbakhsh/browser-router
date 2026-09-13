@@ -40,6 +40,12 @@ final class SetupWindowController: NSWindowController {
     }
     refreshProfiles(config: config)
     rulesTextView.string = config?.rules.map(pattern).joined(separator: "\n") ?? ""
+    rulesTextView.textStorage?.setAttributes(
+      [
+        .foregroundColor: NSColor.textColor,
+        .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+      ],
+      range: NSRange(location: 0, length: rulesTextView.string.utf16.count))
     errorLabel.stringValue = ""
 
     showWindow(nil)
@@ -81,10 +87,21 @@ final class SetupWindowController: NSWindowController {
     routedProfile.controlSize = .large
 
     rulesTextView.font = .monospacedSystemFont(ofSize: 13, weight: .regular)
+    rulesTextView.textColor = .textColor
+    rulesTextView.backgroundColor = .textBackgroundColor
     rulesTextView.isRichText = false
     rulesTextView.isAutomaticQuoteSubstitutionEnabled = false
     rulesTextView.isAutomaticDashSubstitutionEnabled = false
     rulesTextView.textContainerInset = NSSize(width: 8, height: 8)
+    rulesTextView.minSize = NSSize(width: 0, height: 170)
+    rulesTextView.maxSize = NSSize(
+      width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+    rulesTextView.isVerticallyResizable = true
+    rulesTextView.isHorizontallyResizable = false
+    rulesTextView.autoresizingMask = [.width]
+    rulesTextView.textContainer?.widthTracksTextView = true
+    rulesTextView.textContainer?.containerSize = NSSize(
+      width: 0, height: CGFloat.greatestFiniteMagnitude)
     let scrollView = NSScrollView()
     scrollView.hasVerticalScroller = true
     scrollView.borderType = .bezelBorder
@@ -100,8 +117,11 @@ final class SetupWindowController: NSWindowController {
     let saveButton = NSButton(
       title: "Save and make default", target: self, action: #selector(save))
     saveButton.bezelStyle = .rounded
+    saveButton.bezelColor = .controlAccentColor
     saveButton.keyEquivalent = "\r"
-    let buttons = NSStackView(views: [cancelButton, saveButton])
+    let buttonSpacer = NSView()
+    buttonSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+    let buttons = NSStackView(views: [buttonSpacer, cancelButton, saveButton])
     buttons.orientation = .horizontal
     buttons.spacing = 8
     buttons.alignment = .centerY
@@ -124,7 +144,7 @@ final class SetupWindowController: NSWindowController {
       view.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
     }
     buttons.translatesAutoresizingMaskIntoConstraints = false
-    buttons.trailingAnchor.constraint(equalTo: stack.trailingAnchor).isActive = true
+    buttons.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
 
     contentView.addSubview(stack)
     stack.translatesAutoresizingMaskIntoConstraints = false

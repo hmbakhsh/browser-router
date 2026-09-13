@@ -30,6 +30,15 @@ struct ConfigStoreTests {
     #expect(store.config == config)
   }
 
+  @Test("Loads pre-browser configs as Helium configs")
+  func loadsLegacyHeliumConfig() throws {
+    let json = #"{"defaultProfile":"Personal","rules":[]}"#
+    let config = try JSONDecoder().decode(RouterConfig.self, from: Data(json.utf8))
+
+    #expect(config.browser == nil)
+    #expect(config.selectedBrowser == .helium)
+  }
+
   @Test("Rejects malformed JSON without retaining a config")
   func rejectsMalformedJSON() throws {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
