@@ -1,4 +1,4 @@
-@testable import BrowserRouter
+@testable import Rootie
 
 enum TestFixtures {
   static let workConfig = RouterConfig(

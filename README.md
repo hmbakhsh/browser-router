@@ -1,4 +1,4 @@
-# Browser Router
+# Rootie
 
 A tiny native macOS app that opens links in the right Chromium browser profile.
 No Electron, no background service, and no browser extension for links opened
@@ -11,14 +11,14 @@ from Mail, Slack, Terminal, IDEs, and other apps.
 - Routes by exact domain, subdomain, and path prefix
 - Opens the matching Chromium profile directly
 - Automatic starter configuration based on installed browsers and profiles
-- Plain JSON configuration at `~/.browser-router/config.json`
+- Plain JSON configuration at `~/.rootie/config.json`
 - CLI for setup, discovery, and validation
 - Native menu-bar app with negligible idle CPU use
 - Universal app for Apple Silicon and Intel Macs
 
 ## Supported browsers
 
-Browser Router automatically detects:
+Rootie automatically detects:
 
 - Helium
 - Google Chrome
@@ -35,24 +35,24 @@ the JSON configuration.
 ### Homebrew
 
 ```sh
-brew install --cask hmbakhsh/tap/browser-router
+brew install --cask hmbakhsh/tap/rootie
 ```
 
-This installs both **Browser Router.app** and the `browser-router` command.
+This installs both **Rootie.app** and the `rootie` command.
 
 ### Install script
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/hmbakhsh/browser-router/main/scripts/install-release.sh | zsh
+curl -fsSL https://raw.githubusercontent.com/hmbakhsh/rootie/main/scripts/install-release.sh | zsh
 ```
 
 ### Download
 
-Download `Browser-Router.zip` from the
-[latest release](https://github.com/hmbakhsh/browser-router/releases/latest),
-unzip it, and move **Browser Router** to your Applications folder.
+Download `Rootie.zip` from the
+[latest release](https://github.com/hmbakhsh/rootie/releases/latest),
+unzip it, and move **Rootie** to your Applications folder.
 
-On first launch, Browser Router creates `~/.browser-router/config.json` using an
+On first launch, Rootie creates `~/.rootie/config.json` using an
 installed browser and profile, then opens it in your text editor. Add your rules,
 save the file, choose **Reload Configuration**, then choose **Make Default
 Browser** from the menu-bar icon.
@@ -60,21 +60,24 @@ Browser** from the menu-bar icon.
 You can instead configure it from Terminal:
 
 ```sh
-browser-router setup
-browser-router config
-browser-router validate
-browser-router default
+rootie setup
+rootie config
+rootie validate
+rootie default
 ```
 
-Run `browser-router help` for browser and profile discovery commands or use
+Run `rootie help` for browser and profile discovery commands or use
 `--browser` and `--profile` with `setup` for non-interactive configuration.
+
+Upgrading from Browser Router? Rootie automatically moves an existing
+`~/.browser-router/config.json` to `~/.rootie/config.json` the first time it runs.
 
 ## JSON configuration
 
 Use **Open Configuration** in the menu bar, or edit:
 
 ```text
-~/.browser-router/config.json
+~/.rootie/config.json
 ```
 
 See [`config.example.json`](config.example.json) for the complete format. To use
@@ -104,8 +107,8 @@ top to bottom; the first enabled match wins, and unmatched links use
 Requires macOS 13 or later and Xcode 16 or later.
 
 ```sh
-git clone https://github.com/hmbakhsh/browser-router.git
-cd browser-router
+git clone https://github.com/hmbakhsh/rootie.git
+cd rootie
 ./scripts/install.sh
 ```
 
@@ -124,7 +127,7 @@ swift test
 
 ## Privacy
 
-Browser Router runs locally. It does not send URLs, configuration, or profile
+Rootie runs locally. It does not send URLs, configuration, or profile
 data anywhere.
 
 ## License

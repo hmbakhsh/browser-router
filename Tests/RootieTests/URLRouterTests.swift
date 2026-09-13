@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import BrowserRouter
+@testable import Rootie
 
 struct URLRouterTests {
   private let config = TestFixtures.workConfig

@@ -3,14 +3,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "BrowserRouter",
+    name: "Rootie",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "BrowserRouter", targets: ["BrowserRouter"])
+        .executable(name: "Rootie", targets: ["Rootie"])
     ],
     targets: [
-        .executableTarget(name: "BrowserRouter"),
-        .testTarget(name: "BrowserRouterTests", dependencies: ["BrowserRouter"])
+        .executableTarget(name: "Rootie"),
+        .testTarget(name: "RootieTests", dependencies: ["Rootie"])
     ],
     swiftLanguageModes: [.v5]
 )

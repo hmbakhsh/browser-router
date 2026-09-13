@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import BrowserRouter
+@testable import Rootie
 
 struct DefaultBrowserSetterTests {
   @Test("Requests the HTTP handler once because macOS updates both web schemes")

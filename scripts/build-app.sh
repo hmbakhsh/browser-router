@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="${0:A:h:h}"
-APP_NAME="Browser Router.app"
+APP_NAME="Rootie.app"
 APP="$ROOT/dist/$APP_NAME"
 
 cd "$ROOT"
@@ -11,7 +11,7 @@ swift build -c release --arch arm64 --arch x86_64
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN_DIR/BrowserRouter" "$APP/Contents/MacOS/BrowserRouter"
+cp "$BIN_DIR/Rootie" "$APP/Contents/MacOS/Rootie"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 
 ICONSET=$(mktemp -d)/AppIcon.iconset

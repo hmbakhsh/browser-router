@@ -2,8 +2,8 @@ import AppKit
 import Foundation
 
 @MainActor
-struct BrowserRouterCLI {
-  static let commandName = "browser-router"
+struct RootieCLI {
+  static let commandName = "rootie"
 
   let arguments: [String]
   let configStore: ConfigStore
@@ -26,7 +26,7 @@ struct BrowserRouterCLI {
     errorOutput: @escaping (String) -> Void = { message in
       FileHandle.standardError.write(Data("\(message)\n".utf8))
     },
-    openFile: @escaping @MainActor (URL) throws -> Void = BrowserRouterCLI.openInTextEditor
+    openFile: @escaping @MainActor (URL) throws -> Void = RootieCLI.openInTextEditor
   ) {
     self.arguments = arguments
     self.configStore = configStore
@@ -60,7 +60,7 @@ struct BrowserRouterCLI {
       case "validate": try validate()
       case "default": try makeDefault()
       default:
-        throw CLIError.usage("Unknown command “\(command)”. Run browser-router help.")
+        throw CLIError.usage("Unknown command “\(command)”. Run rootie help.")
       }
       return 0
     } catch {
@@ -116,7 +116,7 @@ struct BrowserRouterCLI {
     output("Browser: \(browser.name)")
     output("Default profile: \(profile.displayName)")
     if existing?.rules.isEmpty != false {
-      output("Add routing rules with browser-router config, then run browser-router validate.")
+      output("Add routing rules with rootie config, then run rootie validate.")
     }
   }
 
@@ -151,7 +151,7 @@ struct BrowserRouterCLI {
 
   private func makeDefault() throws {
     guard let appURL = Self.applicationURL() else {
-      throw CLIError.usage("Could not locate Browser Router.app from this executable.")
+      throw CLIError.usage("Could not locate Rootie.app from this executable.")
     }
 
     var result: Result<Void, Error>?
@@ -162,7 +162,7 @@ struct BrowserRouterCLI {
       RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.05))
     }
     try result?.get()
-    output("Browser Router is now the default browser.")
+    output("Rootie is now the default browser.")
   }
 
   private func availableBrowsers(existing: RouterConfig? = nil) -> [ChromiumBrowser] {
@@ -286,16 +286,16 @@ struct BrowserRouterCLI {
   }
 
   static let help = """
-    Browser Router routes external links to Chromium profiles.
+    Rootie routes external links to Chromium profiles.
 
-    Usage: browser-router <command> [options]
+    Usage: rootie <command> [options]
 
       setup                         Configure browser and default profile
       browsers                      List detected Chromium browsers
       profiles [--browser NAME]     List profiles
-      config                        Open ~/.browser-router/config.json
+      config                        Open ~/.rootie/config.json
       validate                      Validate JSON and referenced profiles
-      default                       Make Browser Router the default browser
+      default                       Make Rootie the default browser
       version                       Print the installed version
       help                          Show this help
 
