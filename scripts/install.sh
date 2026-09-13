@@ -14,4 +14,4 @@ open -Ra "$DESTINATION"
 open "$DESTINATION"
 
 echo "Installed $DESTINATION"
-echo "Follow the setup window to choose profiles and make Browser Router the default."
+echo "Edit ~/.browser-router/config.json, then make Browser Router the default from its menu."

@@ -4,7 +4,7 @@ import Testing
 @testable import BrowserRouter
 
 struct ConfigStoreTests {
-  @Test("Reports when setup has not created a configuration")
+  @Test("Reports when no configuration exists")
   func reportsMissingConfig() throws {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     defer { try? FileManager.default.removeItem(at: directory) }

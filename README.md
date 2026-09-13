@@ -8,14 +8,14 @@ from Mail, Slack, Terminal, IDEs, and other apps.
 
 - Routes by exact domain, subdomain, and path prefix
 - Opens the matching Chromium profile directly
-- First-run setup with automatic browser and profile discovery
+- Automatic starter configuration based on installed browsers and profiles
 - Plain JSON configuration at `~/.browser-router/config.json`
 - Native menu-bar app with negligible idle CPU use
 - Universal app for Apple Silicon and Intel Macs
 
 ## Supported browsers
 
-The setup screen automatically detects:
+Browser Router automatically detects:
 
 - Helium
 - Google Chrome
@@ -41,30 +41,10 @@ Download `Browser-Router.zip` from the
 [latest release](https://github.com/hmbakhsh/browser-router/releases/latest),
 unzip it, and move **Browser Router** to your Applications folder.
 
-On first launch:
-
-1. Choose your Chromium browser.
-2. Choose the default and routed profiles.
-3. Add matching domains, one per line.
-4. Click **Save and make default**.
-
-## Domain patterns
-
-The setup screen accepts concise patterns:
-
-```text
-meet.google.com
-*.example.com
-github.com/your-organization/**
-app.example.com/workspace/**
-```
-
-- `example.com` matches the exact host.
-- `*.example.com` matches the apex and all subdomains.
-- A path ending in `/**` matches that path and its descendants.
-
-Rules are evaluated from top to bottom. The first enabled match wins; unmatched
-links use `defaultProfile`.
+On first launch, Browser Router creates `~/.browser-router/config.json` using an
+installed browser and profile, then opens it in your text editor. Add your rules,
+save the file, choose **Reload Configuration**, then choose **Make Default
+Browser** from the menu-bar icon.
 
 ## JSON configuration
 
@@ -90,6 +70,11 @@ another Chromium fork, set:
 Profile values are display names from the browser's profile menu, not directory
 names. Reload after editing. Invalid JSON stops routing rather than opening a
 link under the wrong identity.
+
+Set `includeSubdomains` to match an apex domain and its subdomains. Set an
+optional `pathPrefix` to limit a rule to one URL path. Rules are evaluated from
+top to bottom; the first enabled match wins, and unmatched links use
+`defaultProfile`.
 
 ## Build from source
 

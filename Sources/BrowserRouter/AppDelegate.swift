@@ -7,7 +7,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   private var statusItem: NSStatusItem!
   private var statusMenuItem: NSMenuItem!
-  private var setupWindowController: SetupWindowController?
   private var lastResult = "Starting…"
 
   func applicationDidFinishLaunching(_ notification: Notification) {
@@ -15,13 +14,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     if configStore.load() {
       updateStatus("Ready")
     } else if configStore.error as? ConfigError == .missing {
-      updateStatus("Setup required")
-      showSetup()
+      createStarterConfiguration()
     } else {
       showError(title: "Could not load configuration", error: configStore.error)
-    }
-    if CommandLine.arguments.contains("--setup") {
-      showSetup()
     }
   }
 
@@ -64,8 +59,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     menu.addItem(statusMenuItem)
     menu.addItem(.separator())
     menu.addItem(
-      withTitle: "Setup…", action: #selector(openSetup), keyEquivalent: "")
-    menu.addItem(
       withTitle: "Open Configuration", action: #selector(openConfiguration), keyEquivalent: ",")
     menu.addItem(
       withTitle: "Reload Configuration", action: #selector(reloadConfiguration), keyEquivalent: "r")
@@ -87,7 +80,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc private func openConfiguration() {
     if !FileManager.default.fileExists(atPath: configStore.configURL.path) {
-      showSetup()
+      createStarterConfiguration()
       return
     }
 
@@ -98,36 +91,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       try process.run()
     } catch {
       showError(title: "Could not open configuration", error: error)
-    }
-  }
-
-  @objc private func openSetup() {
-    showSetup()
-  }
-
-  private func showSetup() {
-    var browsers = BrowserCatalog.installed()
-    if let configured = configStore.config?.selectedBrowser,
-      !browsers.contains(where: { $0.applicationPath == configured.applicationPath })
-    {
-      browsers.append(configured)
-    }
-
-    guard !browsers.isEmpty else {
-      showMessage(
-        title: "No supported browser found",
-        text: "Install and open a Chromium browser once, then run Setup again.",
-        style: .warning)
-      return
-    }
-
-    let controller = setupWindowController ?? SetupWindowController()
-    setupWindowController = controller
-    controller.show(browsers: browsers, config: configStore.config) { [weak self] config in
-      guard let self else { return }
-      try self.configStore.save(config)
-      self.updateStatus("Ready")
-      self.makeDefaultBrowser()
     }
   }
 
@@ -144,6 +107,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     } else {
       updateStatus("Configuration error")
       showError(title: "Could not load configuration", error: configStore.error)
+    }
+  }
+
+  private func createStarterConfiguration() {
+    do {
+      guard let browser = BrowserCatalog.installed().first else {
+        throw ConfigError.invalid(
+          "No supported Chromium browser was found. Install and open one, then choose Open Configuration again."
+        )
+      }
+      let profiles = try ChromiumProfiles(browser: browser).all()
+      guard
+        let profile =
+          profiles.first(where: {
+            $0.displayName.localizedCaseInsensitiveContains("personal")
+          }) ?? profiles.first
+      else {
+        throw ConfigError.invalid(
+          "No profiles were found for \(browser.name). Open the browser once, then choose Open Configuration again."
+        )
+      }
+
+      try configStore.save(
+        RouterConfig(browser: browser, defaultProfile: profile.displayName, rules: []))
+      updateStatus("Edit configuration")
+      openConfiguration()
+    } catch {
+      showError(title: "Could not create configuration", error: error)
     }
   }
 

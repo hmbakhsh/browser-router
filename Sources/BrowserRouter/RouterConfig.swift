@@ -68,7 +68,7 @@ enum ConfigError: LocalizedError, Equatable {
   var errorDescription: String? {
     switch self {
     case .invalid(let message): message
-    case .missing: "No configuration exists yet. Run Setup from the menu bar."
+    case .missing: "No configuration exists yet. Choose Open Configuration from the menu bar."
     }
   }
 }
