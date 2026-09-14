@@ -52,6 +52,18 @@ Download `Rootie.zip` from the
 [latest release](https://github.com/hmbakhsh/rootie/releases/latest),
 unzip it, and move **Rootie** to your Applications folder.
 
+### Update
+
+Homebrew installations update with:
+
+```sh
+brew update
+brew upgrade --cask hmbakhsh/tap/rootie
+```
+
+For install-script or manual installations, run the install script again or
+replace the app with the latest release.
+
 On first launch, Rootie creates `~/.rootie/config.json` using an
 installed browser and profile, then opens it in your text editor. Add your rules,
 save the file, choose **Reload Configuration**, then choose **Make Default
