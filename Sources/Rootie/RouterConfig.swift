@@ -46,17 +46,33 @@ struct URLMatch: Codable, Equatable {
   let includeSubdomains: Bool
   let pathPrefix: String?
 
+  static func normalizeHost(_ host: String) -> String {
+    host.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
   func validate(index: Int) throws {
-    let normalizedHost = host.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "."))
-    guard !normalizedHost.isEmpty,
-      !normalizedHost.contains("/"),
-      !normalizedHost.contains(":")
-    else {
+    let normalizedHost = Self.normalizeHost(host)
+    let labels = normalizedHost.split(separator: ".", omittingEmptySubsequences: false)
+    let validCharacters = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789-")
+    let validHost =
+      !normalizedHost.isEmpty && normalizedHost.utf8.count <= 253
+      && labels.allSatisfy { label in
+        guard !label.isEmpty, label.utf8.count <= 63,
+          let first = label.unicodeScalars.first, let last = label.unicodeScalars.last
+        else { return false }
+        return CharacterSet.alphanumerics.contains(first)
+          && CharacterSet.alphanumerics.contains(last)
+          && label.unicodeScalars.allSatisfy { validCharacters.contains($0) }
+      }
+    guard validHost else {
       throw ConfigError.invalid("rules[\(index)].match.host is not a valid hostname")
     }
 
-    if let pathPrefix, !pathPrefix.hasPrefix("/") {
-      throw ConfigError.invalid("rules[\(index)].match.pathPrefix must begin with /")
+    if let pathPrefix,
+      !pathPrefix.hasPrefix("/") || pathPrefix.contains("?") || pathPrefix.contains("#")
+    {
+      throw ConfigError.invalid(
+        "rules[\(index)].match.pathPrefix must be a path beginning with /")
     }
   }
 }

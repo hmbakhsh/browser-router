@@ -111,6 +111,182 @@ struct RootieCLITests {
     #expect(status == 1)
     #expect(try String(contentsOf: fixture.store.configURL, encoding: .utf8) == "not json")
   }
+
+  @Test("Adds a validated routing rule at the requested position")
+  func addsRoutingRule() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    try fixture.store.save(TestFixtures.workConfig)
+
+    let status = fixture.cli(
+      arguments: [
+        "rules", "add", "--host", "Docs.Example.com", "--profile", "Work", "--name",
+        "Team docs", "--include-subdomains", "--path-prefix", "/handbook", "--position", "1",
+      ],
+      browsers: [.helium],
+      profiles: [
+        ChromiumProfile(displayName: "Personal", directory: "Default"),
+        ChromiumProfile(displayName: "Work", directory: "Profile 1"),
+      ]
+    ).run()
+
+    #expect(status == 0)
+    #expect(fixture.store.load())
+    #expect(
+      fixture.store.config?.rules.first
+        == RoutingRule(
+          name: "Team docs",
+          profile: "Work",
+          enabled: true,
+          match: URLMatch(
+            host: "docs.example.com", includeSubdomains: true, pathPrefix: "/handbook")))
+    #expect(fixture.store.config?.rules.dropFirst() == TestFixtures.workConfig.rules[...])
+  }
+
+  @Test("Rejects an unknown profile without changing routing rules")
+  func rejectsUnknownRuleProfile() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    try fixture.store.save(TestFixtures.workConfig)
+
+    let status = fixture.cli(
+      arguments: ["rules", "add", "--host", "example.com", "--profile", "Missing"],
+      browsers: [.helium],
+      profiles: [ChromiumProfile(displayName: "Personal", directory: "Default")]
+    ).run()
+
+    #expect(status == 64)
+    #expect(fixture.store.load())
+    #expect(fixture.store.config?.rules == TestFixtures.workConfig.rules)
+  }
+
+  @Test("Lists routing rules in precedence order")
+  func listsRoutingRules() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    try fixture.store.save(TestFixtures.workConfig)
+
+    let status = fixture.cli(
+      arguments: ["rules", "list"], browsers: [.helium], profiles: []
+    ).run()
+
+    #expect(status == 0)
+    #expect(fixture.output.first?.hasPrefix("1\tGoogle Meet\t36 Labs\tmeet.google.com") == true)
+    #expect(fixture.output.count == TestFixtures.workConfig.rules.count)
+  }
+
+  @Test("Uses defaults when appending a routing rule")
+  func appendsRoutingRuleWithDefaults() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    try fixture.store.save(
+      RouterConfig(browser: .helium, defaultProfile: "Personal", rules: []))
+
+    let status = fixture.cli(
+      arguments: ["rules", "add", "--host", " Example.COM ", "--profile", "work"],
+      browsers: [.helium],
+      profiles: [ChromiumProfile(displayName: "Work", directory: "Profile 1")]
+    ).run()
+
+    #expect(status == 0)
+    #expect(fixture.store.load())
+    #expect(
+      fixture.store.config?.rules
+        == [
+          RoutingRule(
+            name: "example.com",
+            profile: "Work",
+            enabled: true,
+            match: URLMatch(
+              host: "example.com", includeSubdomains: false, pathPrefix: nil))
+        ])
+  }
+
+  @Test("Rejects malformed rule matchers without changing routing rules")
+  func rejectsMalformedRuleMatchers() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    try fixture.store.save(TestFixtures.workConfig)
+    let invalidArguments = [
+      ["--host", ".example.com"],
+      ["--host", "user@example.com"],
+      ["--host", "*.example.com"],
+      ["--host", "foo bar"],
+      ["--host", "example.com", "--path-prefix", "work"],
+      ["--host", "example.com", "--path-prefix", "/work?token=x"],
+    ]
+
+    for arguments in invalidArguments {
+      let status = fixture.cli(
+        arguments: ["rules", "add"] + arguments + ["--profile", "Personal"],
+        browsers: [.helium],
+        profiles: [ChromiumProfile(displayName: "Personal", directory: "Default")]
+      ).run()
+      #expect(status == 1)
+      #expect(fixture.store.load())
+      #expect(fixture.store.config?.rules == TestFixtures.workConfig.rules)
+    }
+  }
+
+  @Test("Rejects invalid positions and repeated options")
+  func rejectsAmbiguousRuleOptions() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    try fixture.store.save(TestFixtures.workConfig)
+    let invalidArguments = [
+      ["--host", "example.com", "--profile", "Personal", "--position", "0"],
+      ["--host", "example.com", "--profile", "Personal", "--position", "99"],
+      ["--host", "example.com", "--host", "other.com", "--profile", "Personal"],
+      [
+        "--host", "example.com", "--profile", "Personal", "--include-subdomains",
+        "--include-subdomains",
+      ],
+    ]
+
+    for arguments in invalidArguments {
+      let status = fixture.cli(
+        arguments: ["rules", "add"] + arguments,
+        browsers: [.helium],
+        profiles: [ChromiumProfile(displayName: "Personal", directory: "Default")]
+      ).run()
+      #expect(status == 64)
+      #expect(fixture.store.load())
+      #expect(fixture.store.config?.rules == TestFixtures.workConfig.rules)
+    }
+  }
+
+  @Test("Lists empty and detailed routing rules")
+  func listsRuleDetails() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    try fixture.store.save(
+      RouterConfig(browser: .helium, defaultProfile: "Personal", rules: []))
+
+    var status = fixture.cli(
+      arguments: ["rules", "list"], browsers: [.helium], profiles: []
+    ).run()
+    #expect(status == 0)
+    #expect(fixture.output == ["No routing rules configured."])
+
+    fixture.output = []
+    try fixture.store.save(
+      RouterConfig(
+        browser: .helium,
+        defaultProfile: "Personal",
+        rules: [
+          RoutingRule(
+            name: "Docs",
+            profile: "Work",
+            enabled: false,
+            match: URLMatch(
+              host: "example.com", includeSubdomains: true, pathPrefix: "/docs"))
+        ]))
+    status = fixture.cli(
+      arguments: ["rules", "list"], browsers: [.helium], profiles: []
+    ).run()
+    #expect(status == 0)
+    #expect(fixture.output == ["1\tDocs (disabled)\tWork\texample.com + subdomains/docs"])
+  }
 }
 
 @MainActor

@@ -69,6 +69,36 @@ rootie default
 Run `rootie help` for browser and profile discovery commands or use
 `--browser` and `--profile` with `setup` for non-interactive configuration.
 
+Add and inspect routing rules from Terminal:
+
+```sh
+rootie rules list
+rootie rules add --host example.com --profile Work --include-subdomains
+rootie rules add --host github.com --path-prefix /your-organization \
+  --profile Work --name "Work GitHub"
+```
+
+Use `--position N` when a new rule must run before an existing broader rule.
+Rootie validates the profile and configuration before writing it, and the
+menu-bar app loads changes when it receives the next link.
+
+## Agent skill
+
+Rootie ships a portable [Agent Skill](https://agentskills.io) that lets Claude
+Code, OpenCode, Codex, and other compatible agents safely add routing rules from
+natural-language requests. Install it globally from this repository:
+
+```sh
+npx skills add hmbakhsh/rootie --skill rootie-routing -g
+```
+
+To target specific agents non-interactively:
+
+```sh
+npx skills add hmbakhsh/rootie --skill rootie-routing -g \
+  -a claude-code -a opencode -a codex
+```
+
 Upgrading from Browser Router? Rootie automatically moves an existing
 `~/.browser-router/config.json` to `~/.rootie/config.json` the first time it runs.
 
