@@ -23,8 +23,7 @@ struct URLRouter {
   }
 
   private func matches(url: URL, host: String, matcher: URLMatch) -> Bool {
-    let expectedHost = matcher.host.lowercased().trimmingCharacters(
-      in: CharacterSet(charactersIn: "."))
+    let expectedHost = URLMatch.normalizeHost(matcher.host)
     let hostMatches =
       host == expectedHost
       || (matcher.includeSubdomains && host.hasSuffix("." + expectedHost))

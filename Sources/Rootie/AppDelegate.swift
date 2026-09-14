@@ -21,20 +21,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func application(_ application: NSApplication, open urls: [URL]) {
-    for url in urls where url.scheme == "http" || url.scheme == "https" {
-      route(url)
-    }
-  }
-
-  private func route(_ url: URL) {
-    if configStore.config == nil {
-      configStore.load()
-    }
-    guard let config = configStore.config else {
+    let webURLs = urls.filter { $0.scheme == "http" || $0.scheme == "https" }
+    guard !webURLs.isEmpty else { return }
+    guard configStore.load(), let config = configStore.config else {
       showError(title: "Routing configuration is invalid", error: configStore.error)
       return
     }
+    for url in webURLs {
+      route(url, config: config)
+    }
+  }
 
+  private func route(_ url: URL, config: RouterConfig) {
     let decision = URLRouter(config: config).route(url)
     do {
       let browser = config.selectedBrowser

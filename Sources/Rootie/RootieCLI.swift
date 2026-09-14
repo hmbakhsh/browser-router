@@ -43,7 +43,7 @@ struct RootieCLI {
     guard let command = arguments.first else { return false }
     return [
       "help", "--help", "-h", "version", "--version", "-v", "browsers", "profiles", "setup",
-      "init", "config", "validate", "default",
+      "init", "config", "validate", "default", "rules",
     ].contains(command)
   }
 
@@ -59,6 +59,7 @@ struct RootieCLI {
       case "config": try openConfiguration()
       case "validate": try validate()
       case "default": try makeDefault()
+      case "rules": try manageRules()
       default:
         throw CLIError.usage("Unknown command “\(command)”. Run rootie help.")
       }
@@ -147,6 +148,130 @@ struct RootieCLI {
     guard profiles.contains(where: { $0.displayName == name }) else {
       throw ChromiumError.profileNotFound(name)
     }
+  }
+
+  private func manageRules() throws {
+    guard arguments.count >= 2 else {
+      throw CLIError.usage("Usage: rootie rules <list|add> [options]")
+    }
+
+    switch arguments[1] {
+    case "list":
+      guard arguments.count == 2 else {
+        throw CLIError.usage("Usage: rootie rules list")
+      }
+      try listRules()
+    case "add":
+      try addRule()
+    default:
+      throw CLIError.usage("Unknown rules command “\(arguments[1])”. Use list or add.")
+    }
+  }
+
+  private func listRules() throws {
+    guard configStore.load(), let config = configStore.config else {
+      throw configStore.error ?? ConfigError.missing
+    }
+
+    if config.rules.isEmpty {
+      output("No routing rules configured.")
+      return
+    }
+
+    for (index, rule) in config.rules.enumerated() {
+      var matcher = rule.match.host
+      if rule.match.includeSubdomains { matcher += " + subdomains" }
+      if let pathPrefix = rule.match.pathPrefix { matcher += pathPrefix }
+      let disabled = rule.enabled ? "" : " (disabled)"
+      output("\(index + 1)\t\(rule.name)\(disabled)\t\(rule.profile)\t\(matcher)")
+    }
+  }
+
+  private func addRule() throws {
+    guard configStore.load(), let config = configStore.config else {
+      throw configStore.error ?? ConfigError.missing
+    }
+
+    let parsed = try parsedRuleOptions()
+    guard let rawHost = parsed.values["host"] else {
+      throw CLIError.usage("Missing required option --host.")
+    }
+    guard let requestedProfile = parsed.values["profile"] else {
+      throw CLIError.usage("Missing required option --profile.")
+    }
+
+    let host = URLMatch.normalizeHost(rawHost)
+    let availableProfiles = try profiles(config.selectedBrowser)
+    let profile = try chooseProfile(
+      from: availableProfiles, requested: requestedProfile, preferred: nil)
+
+    let pathPrefix = parsed.values["path-prefix"]
+    let name = parsed.values["name"] ?? [host, pathPrefix].compactMap { $0 }.joined()
+    let rule = RoutingRule(
+      name: name,
+      profile: profile.displayName,
+      enabled: true,
+      match: URLMatch(
+        host: host,
+        includeSubdomains: parsed.flags.contains("include-subdomains"),
+        pathPrefix: pathPrefix))
+
+    let position: Int
+    if let rawPosition = parsed.values["position"] {
+      guard
+        let requestedPosition = Int(rawPosition),
+        (1...(config.rules.count + 1)).contains(requestedPosition)
+      else {
+        throw CLIError.usage("--position must be between 1 and \(config.rules.count + 1).")
+      }
+      position = requestedPosition
+    } else {
+      position = config.rules.count + 1
+    }
+
+    var rules = config.rules
+    rules.insert(rule, at: position - 1)
+    try configStore.save(
+      RouterConfig(browser: config.browser, defaultProfile: config.defaultProfile, rules: rules))
+    output("Added rule \(position): \(name) → \(profile.displayName)")
+    output("Run ‘rootie rules list’ to review precedence.")
+  }
+
+  private func parsedRuleOptions() throws -> (values: [String: String], flags: Set<String>) {
+    try parseOptions(
+      startingAt: 2,
+      valueOptions: ["--host", "--profile", "--name", "--path-prefix", "--position"],
+      flagOptions: ["--include-subdomains"])
+  }
+
+  private func parseOptions(
+    startingAt startIndex: Int, valueOptions: Set<String>, flagOptions: Set<String> = []
+  ) throws -> (values: [String: String], flags: Set<String>) {
+    var values: [String: String] = [:]
+    var flags: Set<String> = []
+    var index = startIndex
+
+    while index < arguments.count {
+      let option = arguments[index]
+      if flagOptions.contains(option) {
+        guard !flags.contains(String(option.dropFirst(2))) else {
+          throw CLIError.usage("Option “\(option)” was provided more than once.")
+        }
+        flags.insert(String(option.dropFirst(2)))
+        index += 1
+      } else if valueOptions.contains(option), index + 1 < arguments.count {
+        let key = String(option.dropFirst(2))
+        guard values[key] == nil else {
+          throw CLIError.usage("Option “\(option)” was provided more than once.")
+        }
+        values[key] = arguments[index + 1]
+        index += 2
+      } else {
+        throw CLIError.usage("Unknown or incomplete option “\(option)”.")
+      }
+    }
+
+    return (values, flags)
   }
 
   private func makeDefault() throws {
@@ -253,17 +378,7 @@ struct RootieCLI {
   }
 
   private func parsedOptions() throws -> [String: String] {
-    var options: [String: String] = [:]
-    var index = 1
-    while index < arguments.count {
-      let option = arguments[index]
-      guard ["--browser", "--profile"].contains(option), index + 1 < arguments.count else {
-        throw CLIError.usage("Unknown or incomplete option “\(option)”.")
-      }
-      options[String(option.dropFirst(2))] = arguments[index + 1]
-      index += 2
-    }
-    return options
+    try parseOptions(startingAt: 1, valueOptions: ["--browser", "--profile"]).values
   }
 
   private static func openInTextEditor(_ url: URL) throws {
@@ -328,12 +443,22 @@ struct RootieCLI {
       config                        Open ~/.rootie/config.json
       validate                      Validate JSON and referenced profiles
       default                       Make Rootie the default browser
+      rules list                    List rules in precedence order
+      rules add [options]           Add a routing rule
       version                       Print the installed version
       help                          Show this help
 
     Setup options:
       --browser NAME                Select a browser without prompting
       --profile NAME                Select a profile without prompting
+
+    Rules add options:
+      --host HOST                   Hostname to match (required)
+      --profile NAME                Destination profile (required)
+      --name NAME                   Human-readable rule name
+      --include-subdomains          Match subdomains of the host
+      --path-prefix PATH            Match only this URL path
+      --position NUMBER             Insert at this 1-based precedence position
     """
 }
 
