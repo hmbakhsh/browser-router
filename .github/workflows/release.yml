@@ -11,10 +11,31 @@ jobs:
   release:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v5
-      - run: ./scripts/build-app.sh
-      - run: ditto -c -k --keepParent "dist/Rootie.app" Rootie.zip
-      - uses: softprops/action-gh-release@v2
+      - uses: actions/checkout@v6
+      - name: Test
+        run: |
+          swift test
+          xcrun swift-format lint -r Sources Tests scripts/generate-icon.swift
+      - name: Generate release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+            -f "tag_name=$GITHUB_REF_NAME" \
+            --jq .body > release-notes.md
+      - name: Package signed update
+        env:
+          ROOTIE_VERSION: ${{ github.ref_name }}
+          ROOTIE_BUILD_NUMBER: ${{ github.run_number }}
+          ROOTIE_RELEASE_NOTES: release-notes.md
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          export ROOTIE_VERSION="${ROOTIE_VERSION#v}"
+          ./scripts/package-release.sh
+      - uses: softprops/action-gh-release@v3
         with:
-          files: Rootie.zip
-          generate_release_notes: true
+          body_path: release-notes.md
+          fail_on_unmatched_files: true
+          files: |
+            dist/release/Rootie.zip
+            dist/release/appcast.xml

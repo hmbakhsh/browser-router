@@ -13,6 +13,7 @@ struct RootieCLI {
   let output: (String) -> Void
   let errorOutput: (String) -> Void
   let openFile: @MainActor (URL) throws -> Void
+  let runUpdate: @MainActor () throws -> Int32
 
   init(
     arguments: [String],
@@ -26,7 +27,8 @@ struct RootieCLI {
     errorOutput: @escaping (String) -> Void = { message in
       FileHandle.standardError.write(Data("\(message)\n".utf8))
     },
-    openFile: @escaping @MainActor (URL) throws -> Void = RootieCLI.openInTextEditor
+    openFile: @escaping @MainActor (URL) throws -> Void = RootieCLI.openInTextEditor,
+    runUpdate: (@MainActor () throws -> Int32)? = nil
   ) {
     self.arguments = arguments
     self.configStore = configStore
@@ -36,6 +38,11 @@ struct RootieCLI {
     self.output = output
     self.errorOutput = errorOutput
     self.openFile = openFile
+    self.runUpdate =
+      runUpdate ?? {
+        try CLIUpdateDriver.run(
+          readInput: readInput, output: output, errorOutput: errorOutput)
+      }
   }
 
   static func shouldRun(arguments: [String], executablePath: String) -> Bool {
@@ -43,7 +50,7 @@ struct RootieCLI {
     guard let command = arguments.first else { return false }
     return [
       "help", "--help", "-h", "version", "--version", "-v", "browsers", "profiles", "setup",
-      "init", "config", "validate", "default", "rules",
+      "init", "config", "validate", "default", "rules", "update",
     ].contains(command)
   }
 
@@ -60,6 +67,9 @@ struct RootieCLI {
       case "validate": try validate()
       case "default": try makeDefault()
       case "rules": try manageRules()
+      case "update":
+        guard arguments.count == 1 else { throw CLIError.usage("Usage: rootie update") }
+        return try runUpdate()
       default:
         throw CLIError.usage("Unknown command “\(command)”. Run rootie help.")
       }
@@ -445,6 +455,7 @@ struct RootieCLI {
       default                       Make Rootie the default browser
       rules list                    List rules in precedence order
       rules add [options]           Add a routing rule
+      update                        Check for and install a Rootie update
       version                       Print the installed version
       help                          Show this help
 

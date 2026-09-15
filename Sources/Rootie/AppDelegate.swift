@@ -4,12 +4,14 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
   private let configStore = ConfigStore()
   private let defaultBrowserSetter = DefaultBrowserSetter()
+  private let nativeUpdater = NativeUpdater()
 
   private var statusItem: NSStatusItem!
   private var statusMenuItem: NSMenuItem!
   private var lastResult = "Starting…"
 
   func applicationDidFinishLaunching(_ notification: Notification) {
+    nativeUpdater.start()
     buildMenu()
     if configStore.load() {
       updateStatus("Ready")
@@ -62,6 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       withTitle: "Reload Configuration", action: #selector(reloadConfiguration), keyEquivalent: "r")
     menu.addItem(
       withTitle: "Make Default Browser", action: #selector(makeDefaultBrowser), keyEquivalent: "")
+    menu.addItem(nativeUpdater.menuItem())
     menu.addItem(
       withTitle: "Troubleshooting", action: #selector(showTroubleshooting), keyEquivalent: "")
     menu.addItem(.separator())
@@ -70,7 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       keyEquivalent: "q")
     quitItem.target = NSApp
 
-    for item in menu.items where item.action != nil && item !== quitItem {
+    for item in menu.items where item.action != nil && item.target == nil && item !== quitItem {
       item.target = self
     }
     statusItem.menu = menu
