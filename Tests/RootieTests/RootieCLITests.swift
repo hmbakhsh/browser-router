@@ -13,7 +13,37 @@ struct RootieCLITests {
     #expect(
       RootieCLI.shouldRun(arguments: ["validate"], executablePath: "/app/Rootie"))
     #expect(
+      RootieCLI.shouldRun(arguments: ["update"], executablePath: "/app/Rootie"))
+    #expect(
       !RootieCLI.shouldRun(arguments: ["-psn_0_123"], executablePath: "/app/Rootie"))
+  }
+
+  @Test("Update command delegates to the updater")
+  func runsUpdate() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+    var invocations = 0
+
+    let status = fixture.cli(arguments: ["update"], browsers: [], profiles: []) {
+      invocations += 1
+      return 0
+    }.run()
+
+    #expect(status == 0)
+    #expect(invocations == 1)
+  }
+
+  @Test("Update command rejects extra arguments")
+  func rejectsUpdateArguments() throws {
+    let fixture = try Fixture()
+    defer { fixture.remove() }
+
+    let status = fixture.cli(
+      arguments: ["update", "--force"], browsers: [], profiles: [], runUpdate: { 0 }
+    ).run()
+
+    #expect(status == 64)
+    #expect(fixture.errors.contains(where: { $0.contains("Usage: rootie update") }))
   }
 
   @Test("Reads the version from the app bundle when invoked through a CLI symlink")
@@ -303,7 +333,8 @@ private final class Fixture {
   }
 
   func cli(
-    arguments: [String], browsers: [ChromiumBrowser], profiles: [ChromiumProfile]
+    arguments: [String], browsers: [ChromiumBrowser], profiles: [ChromiumProfile],
+    runUpdate: (() throws -> Int32)? = nil
   ) -> RootieCLI {
     RootieCLI(
       arguments: arguments,
@@ -313,7 +344,8 @@ private final class Fixture {
       readInput: { nil },
       output: { self.output.append($0) },
       errorOutput: { self.errors.append($0) },
-      openFile: { _ in })
+      openFile: { _ in },
+      runUpdate: runUpdate)
   }
 
   func remove() {

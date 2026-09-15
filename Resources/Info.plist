@@ -26,6 +26,22 @@
     <string>13.0</string>
     <key>LSUIElement</key>
     <true/>
+    <key>SUEnableAutomaticChecks</key>
+    <false/>
+    <key>SUAutomaticallyUpdate</key>
+    <false/>
+    <key>SUAllowsAutomaticUpdates</key>
+    <false/>
+    <key>SUFeedURL</key>
+    <string>https://github.com/hmbakhsh/rootie/releases/latest/download/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>7e38BHArNTB69QPfvFxx4CqbDDSgiv+nPi6lgZIEJrQ=</string>
+    <key>SURequireSignedFeed</key>
+    <true/>
+    <key>SUSignedFeedFailureExpirationInterval</key>
+    <integer>0</integer>
+    <key>SUVerifyUpdateBeforeExtraction</key>
+    <true/>
     <key>CFBundleURLTypes</key>
     <array>
         <dict>

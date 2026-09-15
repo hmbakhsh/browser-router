@@ -13,6 +13,7 @@ from Mail, Slack, Terminal, IDEs, and other apps.
 - Automatic starter configuration based on installed browsers and profiles
 - Plain JSON configuration at `~/.rootie/config.json`
 - CLI for setup, discovery, and validation
+- User-triggered, cryptographically verified updates from the CLI or menu bar
 - Native menu-bar app with negligible idle CPU use
 - Universal app for Apple Silicon and Intel Macs
 
@@ -54,15 +55,20 @@ unzip it, and move **Rootie** to your Applications folder.
 
 ### Update
 
-Homebrew installations update with:
+After installing an updater-enabled release, check from the menu bar with
+**Check for Updates…** or run:
 
 ```sh
-brew update
-brew upgrade --cask hmbakhsh/tap/rootie
+rootie update
 ```
 
-For install-script or manual installations, run the install script again or
-replace the app with the latest release.
+The same Sparkle update flow works for Homebrew, install-script, and manual
+installations. It shows the installed and latest versions and release notes,
+then asks before downloading or installing anything. Rootie never checks for
+updates in the background.
+
+Versions older than the first updater-enabled release need one final update
+through Homebrew, the install script, or the latest release download.
 
 On first launch, Rootie creates `~/.rootie/config.json` using an
 installed browser and profile, then opens it in your text editor. Add your rules,
@@ -165,12 +171,15 @@ swift test
 
 - macOS only sends links from external apps to its default browser handler.
   Links clicked inside a browser require a browser extension.
-- Release builds are currently ad-hoc signed rather than Apple-notarized.
+- Release builds are ad-hoc signed rather than Apple-notarized. Homebrew removes
+  quarantine during installation; manual downloads may require approval in
+  **System Settings → Privacy & Security**.
 
 ## Privacy
 
-Rootie runs locally. It does not send URLs, configuration, or profile
-data anywhere.
+Rootie routes links locally. It does not send URLs, configuration, or profile
+data anywhere. It contacts GitHub Releases only when you explicitly check for
+an update.
 
 ## License
 
